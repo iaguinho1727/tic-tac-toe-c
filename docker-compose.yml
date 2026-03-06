@@ -1,0 +1,8 @@
+name: c_structures
+services:
+  library:
+    build: .
+    volumes:
+      - .:/app
+
+

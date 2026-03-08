@@ -27,6 +27,7 @@
 *.so
 *.so.*
 *.dylib
+.vscode
 
 # Executables
 *.exe
@@ -52,5 +53,4 @@ Mkfile.old
 dkms.conf
 .vscode
 .idea
-out/*
-!out/
+out/

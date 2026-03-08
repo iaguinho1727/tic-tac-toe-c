@@ -1,4 +1,9 @@
+#include "core.h"
 int main()
 {
-    return 0;
+	setup_ctrl_c_signal();
+	enable_raw_input();
+	run_game_loop();
+	restore_user_terminal();
+	return 0;
 }

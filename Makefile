@@ -12,7 +12,7 @@ INCLUDE_DIR = include
 OBJ_DIR=$(OUT_DIR)/obj
 EXECUTABLE_EXTENSION=out
 
-EXECUTABLE_BASENAME = NatoInvaders
+EXECUTABLE_BASENAME = TicTacToe
 
 SRC_EXTENSIONS=c
 SRCS =$(foreach ext,$(SRC_EXTENSIONS),$(wildcard $(SRC_DIR)/*.$(ext)) )
@@ -24,23 +24,24 @@ LDFLAGS = #$(shell pkg-config --libs $(PKG_CONFIG_LIBS))
 
 all: $(EXECUTABLE_DESTINATION)
 
-
-$(EXECUTABLE_DESTINATION): $(SRCS) 
+$(EXECUTABLE_DESTINATION): $(SRCS) | $(OUT_DIR)
 	$(CC) $(CFLAGS) $^ $(LDFLAGS) -o $@
 
 
 
+$(OUT_DIR):
+	mkdir -p $(OUT_DIR)
 
 
-
-valgrind: 
+valgrind:
 	valgrind $(EXECUTABLE_DESTINATION)
 
-
+run:
+	./$(EXECUTABLE_DESTINATION)
 
 # Clean up
 clean:
-	rm  $(BIN_FOLDER)/* $(OBJ_DIR)/*
+	rm  $(EXECUTABLE_DESTINATION)
 
 # Phony targets
-.PHONY: all clean valgrind 
+.PHONY: all clean valgrind

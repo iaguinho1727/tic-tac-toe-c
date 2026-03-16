@@ -7,12 +7,6 @@
 #include <ctype.h>
 #include <termios.h>
 
-//   2 | 6 | 10    1 | 2 | 3
-//  ---+---+---  ---+---+---
-//   3 | 4 | 5   4 | 5 | 6
-//  ---+---+---  ---+---+---
-//   6 | 7 | 8   7 | 8 | 9
-
 static struct termios orig_termios;
 
 void restore_user_terminal(void) {
@@ -46,48 +40,69 @@ void print_column()
 }
 bool print_line()
 {
-	printf("---+---+---\n");
+	printf("\t---+---+---\n");
 	return true;
 }
 
-bool change_mouse_cursor_based_on_mouse_position(MousePosition* position)
+void fill_board(char board[BOARD_WIDTH][BOARD_HEIGHT])
 {
-	const short int POSITIONS_FOR_COLUMNS[]={2, 6 ,10};
-	const short int POSITION_FOR_ROWS[]={0,3,5};
-	const short int new_column=POSITIONS_FOR_COLUMNS[position->column];
-	const short int new_row=POSITION_FOR_ROWS[position->row];
-	printf("\033[%d;%dH", new_row, new_column); // move cursor, don't print anything
-	fflush(stdout);
-	return true;
-}
-
-bool print_cell(const char* board, short int index)
-{
-	const char item=board[index];
-	printf(" %c ",item);
-	return true;
-}
-
-void print_board_row(char board[BOARD_WIDTH][BOARD_HEIGHT],short int row)
-{
-	for(short int column=0;column+1<BOARD_HEIGHT;column++)
+	for(short int r=0;r<BOARD_WIDTH;r++)
 	{
-		const char item=board[row][column];
-		if(item==0)
+		for(short c=0;c<BOARD_HEIGHT;c++)
 		{
-			printf("   ");
-		}else{
-			printf(" %c ",item);
+			board[r][c]=EMPTY;
 		}
-		printf("|");
 	}
 }
 
-void print_tic_tac_toe_board( char board[BOARD_WIDTH][BOARD_HEIGHT])
+void clear_screen()
 {
+	printf(CLEAR_CODE);
+}
+
+void print_highlight(const char item)
+{
+	printf(START_REVERSE_VIDEO" %c "END_REVERSE_VIDEO,item);
+}
+
+void print_board_row(char board[BOARD_WIDTH][BOARD_HEIGHT],short int row,MousePosition* cursor)
+{
+	for(short int column=0;column<BOARD_HEIGHT;column++)
+	{
+		const char item=board[row][column];
+		const bool is_cursor=(cursor->column==column && cursor->row==row);
+		if(is_cursor)
+		{
+			print_highlight(item);
+		}
+		else{
+			printf(" %c ",item);
+
+		}
+		const bool is_not_last_cell=column<BOARD_WIDTH-1;
+		if(is_not_last_cell)
+		{
+			printf("|");
+		}
+
+	}
+}
+
+const char get_mark_based_on_turn(unsigned short int* turn)
+{
+	return (*turn)%2==0 ? 'X' : 'O';
+}
+
+
+void render_game_screen( char board[BOARD_WIDTH][BOARD_HEIGHT],MousePosition* cursor,unsigned short int* turn)
+{
+	printf("\n  " COLOR_CYAN "Tic-Tac-Toe" COLOR_RESET "  (WASD move, SPACE place, Q quit)\n");
+	const char current_player = get_mark_based_on_turn(turn);
+	printf("  Player turn: " COLOR_GOLD "%c" COLOR_RESET " \n\n", current_player);
 	for(short int row=0;row<BOARD_WIDTH;row++)
 	{
-		print_board_row(board,row);
+		printf("\t");
+		print_board_row(board,row,cursor);
 		printf("\n");
 		if(row>=2)
 		{
@@ -101,7 +116,7 @@ void print_tic_tac_toe_board( char board[BOARD_WIDTH][BOARD_HEIGHT])
 
 bool is_target_position_occupied(char board[BOARD_WIDTH][BOARD_HEIGHT],short int row,short column)
 {
-	return board[row][column]!=0;
+	return board[row][column]!=EMPTY;
 }
 
 bool set_mouse_position_up(MousePosition* position, char board[BOARD_WIDTH][BOARD_HEIGHT])
@@ -168,7 +183,31 @@ bool set_mouse_position_right(MousePosition* position, char board[BOARD_WIDTH][B
 	return true;
 }
 
-void wait_for_user_input( char new_board[BOARD_WIDTH][BOARD_HEIGHT],MousePosition* position)
+bool set_player_mark(MousePosition* position,char board[BOARD_WIDTH][BOARD_HEIGHT],unsigned short int* turn)
+{
+	const char mark=get_mark_based_on_turn(turn);
+	if(is_target_position_occupied(board,position->row,position->column))
+	{
+		return false;
+	}
+	board[position->row][position->column]=mark;
+	return true;
+}
+
+char get_winner(char new_board[BOARD_WIDTH][BOARD_HEIGHT])
+{
+	unsigned short int occorences=0;
+	for(unsigned short int r=0;r<BOARD_WIDTH;r++)
+	{
+		occorences=0;
+		for(unsigned short int c=0;c<BOARD_HEIGHT;c++)
+		{
+
+		}
+	}
+}
+
+void wait_for_user_input( char new_board[BOARD_WIDTH][BOARD_HEIGHT],MousePosition* position,unsigned short int* turn)
 {
 	char command=toupper(getchar());
 	switch (command)
@@ -186,6 +225,13 @@ void wait_for_user_input( char new_board[BOARD_WIDTH][BOARD_HEIGHT],MousePositio
 		case RIGHT:
 			set_mouse_position_right(position,new_board);
 			break;
+		case SPACE:
+			set_player_mark(position,new_board,turn);
+			(*turn)++;
+			break;
+		case QUIT:
+		case ESC:
+			exit_game(0);
 
 
 		default:
@@ -199,19 +245,16 @@ void wait_for_user_input( char new_board[BOARD_WIDTH][BOARD_HEIGHT],MousePositio
 void run_game_loop()
 {
 	char new_board[BOARD_WIDTH][BOARD_HEIGHT]={0};
+	fill_board(new_board);
 
 	MousePosition position;
 	position.column=0;
 	position.row=0;
+	unsigned short turn=0;
 	while(true)
 	{
-		CLEAR_SCREEN();
-		print_tic_tac_toe_board(new_board);
-		change_mouse_cursor_based_on_mouse_position(&position);
-		wait_for_user_input(new_board,&position);
-
-
-
-
+		clear_screen();
+		render_game_screen(new_board,&position,&turn);
+		wait_for_user_input(new_board,&position,&turn);
 	}
 }

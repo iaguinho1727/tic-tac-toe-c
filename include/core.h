@@ -3,7 +3,12 @@
 #define BOARD_HEIGHT 3
 #define BOARD_WIDTH 3
 #define EMPTY ' '
-#define CLEAR_SCREEN() printf("\033[2J\033[H")
+#define COLOR_CYAN  "\x1b[36m"
+#define COLOR_GOLD  "\x1b[33m"
+#define COLOR_RESET "\x1b[0m"
+#define CLEAR_CODE "\033[2J\033[H"
+#define START_REVERSE_VIDEO "\033[7m"
+#define END_REVERSE_VIDEO "\033[0m"
 #include <stdbool.h>
 
 
@@ -13,17 +18,26 @@ typedef struct MousePosition{
 }MousePosition;
 
 typedef enum KeyboardControls{
-	UP=87, // W
-	DOWN=83,  // S
-	LEFT=65,
-	RIGHT=68,
+	UP='W', // W
+	DOWN='S',  // S
+	LEFT='A',
+	RIGHT='D',
+	SPACE=' ',
+	QUIT='Q',
+	ESC=27
 }KeyboardControls;
 
 void setup_ctrl_c_signal();
 
 void run_game_loop();
 
-void print_tic_tac_toe_board( char[BOARD_WIDTH][BOARD_HEIGHT] );
+void clear_screen();
+
+void print_highlight(const char item);
+
+void render_game_screen( char[BOARD_WIDTH][BOARD_HEIGHT],MousePosition* cursor ,unsigned short int*);
+
+const char get_mark_based_on_turn(unsigned short int* turn);
 
 void exit_game(int sig);
 
@@ -39,14 +53,14 @@ bool set_mouse_position_right(MousePosition*,char[BOARD_WIDTH][BOARD_HEIGHT]);
 
 bool is_target_position_occupied(char[BOARD_WIDTH][BOARD_HEIGHT],short int row,short column);
 
+bool set_player_mark(MousePosition* position,char board[BOARD_WIDTH][BOARD_HEIGHT],unsigned short int* turn);
 
-void print_board_row(char [BOARD_WIDTH][BOARD_HEIGHT],short int index);
 
-bool print_cell(const char*,short int);
+void print_board_row(char [BOARD_WIDTH][BOARD_HEIGHT],short int index,MousePosition* cursor);
 
 bool print_line();
 
-void wait_for_user_input( char[BOARD_WIDTH][BOARD_HEIGHT],MousePosition*);
+void wait_for_user_input( char[BOARD_WIDTH][BOARD_HEIGHT],MousePosition*,unsigned short int* turn);
 
 void print_column();
 

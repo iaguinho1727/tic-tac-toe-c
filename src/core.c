@@ -25,7 +25,7 @@ void enable_raw_input(void) {
 
 void exit_game(int sig)
 {
-	printf("Exiting game... Received signal %d\n", sig);
+	printf(COLOR_RED"\nExiting game... Received signal %d\n"COLOR_RESET, sig);
 	_exit(0);
 }
 
@@ -40,7 +40,7 @@ void print_column()
 }
 bool print_line()
 {
-	printf("\t---+---+---\n");
+	printf(COLOR_GOLD"\t---+---+---\n"COLOR_RESET);
 	return true;
 }
 
@@ -62,7 +62,11 @@ void clear_screen()
 
 void print_highlight(const char item)
 {
-	printf(START_REVERSE_VIDEO" %c "END_REVERSE_VIDEO,item);
+	printf(COLOR_CYAN START_REVERSE_VIDEO" %c "END_REVERSE_VIDEO COLOR_RESET,item);
+}
+const char* get_mark_color(char item)
+{
+	return item=='X' ? COLOR_RED : COLOR_BLUE;
 }
 
 void print_board_row(char board[BOARD_WIDTH][BOARD_HEIGHT],short int row,MousePosition* cursor)
@@ -76,13 +80,14 @@ void print_board_row(char board[BOARD_WIDTH][BOARD_HEIGHT],short int row,MousePo
 			print_highlight(item);
 		}
 		else{
-			printf(" %c ",item);
+			const char* color=get_mark_color(item);
+			printf("%s %c "COLOR_RESET,color,item);
 
 		}
 		const bool is_not_last_cell=column<BOARD_WIDTH-1;
 		if(is_not_last_cell)
 		{
-			printf("|");
+			printf(COLOR_GOLD"|"COLOR_RESET);
 		}
 
 	}
@@ -96,9 +101,9 @@ const char get_mark_based_on_turn(unsigned short int* turn)
 
 void render_game_screen( char board[BOARD_WIDTH][BOARD_HEIGHT],MousePosition* cursor,unsigned short int* turn)
 {
-	printf("\n  " COLOR_CYAN "Tic-Tac-Toe" COLOR_RESET "  (WASD move, SPACE place, Q quit)\n");
+	printf("\n  " COLOR_CYAN "Tic-Tac-Toe" COLOR_GOLD "  (WASD move, SPACE place, Q quit)\n"COLOR_RESET);
 	const char current_player = get_mark_based_on_turn(turn);
-	printf("  Player turn: " COLOR_GOLD "%c" COLOR_RESET " \n\n", current_player);
+	printf(COLOR_CYAN"  Player Turn: %s %c" COLOR_RESET " \n\n",get_mark_color(current_player), current_player);
 	for(short int row=0;row<BOARD_WIDTH;row++)
 	{
 		printf("\t");

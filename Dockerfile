@@ -1,6 +1,6 @@
 FROM --platform=amd64 gcc:13.2.0 as library
 
-RUN apt-get update -y && apt-get upgrade -y
+RUN apt-get update -y
 
 
 WORKDIR /app
@@ -15,7 +15,5 @@ RUN make -j 4
 
 RUN make install
 
-ENTRYPOINT [ "make" ]
-
-CMD ["test"]
+ENTRYPOINT [ "TicTacToe" ]
 

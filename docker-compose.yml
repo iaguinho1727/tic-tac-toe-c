@@ -1,6 +1,8 @@
-name: c_structures
+name: tictactoe
 services:
-  library:
+  tictactoe:
+    stdin_open: true
+    tty: true
     build: .
     volumes:
       - .:/app

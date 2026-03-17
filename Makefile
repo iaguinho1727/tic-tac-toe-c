@@ -10,17 +10,16 @@ SRC_DIR = src
 OUT_DIR = out
 INCLUDE_DIR = include
 OBJ_DIR=$(OUT_DIR)/obj
-EXECUTABLE_EXTENSION=out
+INSTALLATION_DIR=/usr/local/bin
 
 EXECUTABLE_BASENAME = TicTacToe
 
 SRC_EXTENSIONS=c
 SRCS =$(foreach ext,$(SRC_EXTENSIONS),$(wildcard $(SRC_DIR)/*.$(ext)) )
 
-# PKG_CONFIG_LIBS=sfml-all
-CFLAGS = -g -Wall -Wextra -I$(INCLUDE_DIR) #$(shell pkg-config --cflags $(PKG_CONFIG_LIBS))
-EXECUTABLE_DESTINATION=$(OUT_DIR)/$(EXECUTABLE_BASENAME).$(EXECUTABLE_EXTENSION)
-LDFLAGS = #$(shell pkg-config --libs $(PKG_CONFIG_LIBS))
+
+CFLAGS = -g -Wall -Wextra -I$(INCLUDE_DIR)
+EXECUTABLE_DESTINATION=$(OUT_DIR)/$(EXECUTABLE_BASENAME)
 
 all: $(EXECUTABLE_DESTINATION)
 
@@ -39,9 +38,15 @@ valgrind:
 run:
 	./$(EXECUTABLE_DESTINATION)
 
+install:
+	cp $(EXECUTABLE_DESTINATION) $(INSTALLATION_DIR)
+
+uninstall:
+	rm -f $(INSTALLATION_DIR)/$(EXECUTABLE_BASENAME)
+
 # Clean up
 clean:
 	rm  $(EXECUTABLE_DESTINATION)
 
 # Phony targets
-.PHONY: all clean valgrind
+.PHONY: all clean valgrind install uninstall

@@ -13,7 +13,6 @@ pkgs.mkShell {
   # Optional: automatically create and activate a virtual environment
   shellHook = ''
     make -j 4
-    make test
     sudo make install
   '';
 }

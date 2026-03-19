@@ -124,71 +124,51 @@ bool is_target_position_occupied(char board[BOARD_WIDTH][BOARD_HEIGHT],short int
 	return board[row][column]!=EMPTY;
 }
 
-bool set_mouse_position_up(MousePosition* position, char board[BOARD_WIDTH][BOARD_HEIGHT])
+bool on_mouse_position_up(MousePosition* position)
 {
 	const short int new_row = position->row - 1;
 	if(new_row< 0)
 	{
 		return false;
 	}
-
-	if(is_target_position_occupied(board, new_row, position->column))
-	{
-		return false;
-	}
 	position->row = new_row;
 	return true;
 }
 
-bool set_mouse_position_down(MousePosition* position, char board[BOARD_WIDTH][BOARD_HEIGHT])
+bool on_mouse_position_down(MousePosition* position)
 {
 	const short int new_row = position->row + 1;
 	if(new_row >= BOARD_HEIGHT)
 	{
 		return false;
 	}
-
-	if(is_target_position_occupied(board, new_row, position->column))
-	{
-		return false;
-	}
 	position->row = new_row;
 	return true;
 }
 
-bool set_mouse_position_left(MousePosition* position, char board[BOARD_WIDTH][BOARD_HEIGHT])
+bool on_mouse_position_left(MousePosition* position)
 {
 	const short int new_column = position->column - 1;
 	if(new_column<0)
 	{
 		return false;
 	}
-
-	if(is_target_position_occupied(board, position->row, new_column))
-	{
-		return false;
-	}
 	position->column = new_column;
 	return true;
 }
 
-bool set_mouse_position_right(MousePosition* position, char board[BOARD_WIDTH][BOARD_HEIGHT])
+bool on_mouse_position_right(MousePosition* position)
 {
 	const short int new_column = position->column + 1;
 	if(new_column>=BOARD_WIDTH )
 	{
 		return false;
 	}
-
-	if(is_target_position_occupied(board, position->row, new_column))
-	{
-		return false;
-	}
 	position->column = new_column;
 	return true;
 }
 
-bool set_player_mark(MousePosition* position,char board[BOARD_WIDTH][BOARD_HEIGHT],unsigned short int* turn)
+bool on_set_player_mark(MousePosition* position,char board[BOARD_WIDTH][BOARD_HEIGHT],unsigned short int* turn)
 {
 	const char mark=get_mark_based_on_turn(turn);
 	if(is_target_position_occupied(board,position->row,position->column))
@@ -196,6 +176,7 @@ bool set_player_mark(MousePosition* position,char board[BOARD_WIDTH][BOARD_HEIGH
 		return false;
 	}
 	board[position->row][position->column]=mark;
+	(*turn)++;
 	return true;
 }
 
@@ -230,23 +211,22 @@ bool is_esc_key(char* buffer)
 	return strncmp("\033",buffer,1)==0;
 }
 
-void handle_special_key_event(char new_board[BOARD_WIDTH][BOARD_HEIGHT],
-	MousePosition* cursor,char key)
+void handle_special_key_event(MousePosition* cursor,char key)
 {
 	switch (key)
 	{
 	case UP:
-		set_mouse_position_up(cursor,new_board);
+		on_mouse_position_up(cursor);
 
 		break;
 	case DOWN:
-		set_mouse_position_down(cursor,new_board);
+		on_mouse_position_down(cursor);
 		break;
 	case LEFT:
-		set_mouse_position_left(cursor,new_board);
+		on_mouse_position_left(cursor);
 		break;
 	case RIGHT:
-		set_mouse_position_right(cursor,new_board);
+		on_mouse_position_right(cursor);
 		break;
 	}
 }
@@ -265,7 +245,7 @@ bool handle_player_input( char new_board[BOARD_WIDTH][BOARD_HEIGHT],
 	}else if(special_key)
 	{
 
-		handle_special_key_event(new_board,cursor,buffer[2]);
+		handle_special_key_event(cursor,buffer[2]);
 		return true;
 
 	}
@@ -273,21 +253,20 @@ bool handle_player_input( char new_board[BOARD_WIDTH][BOARD_HEIGHT],
 	switch (upper_cased_input)
 	{
 		case W:
-			set_mouse_position_up(cursor,new_board);
+			on_mouse_position_up(cursor);
 
 			break;
 		case S:
-			set_mouse_position_down(cursor,new_board);
+			on_mouse_position_down(cursor);
 			break;
 		case A:
-			set_mouse_position_left(cursor,new_board);
+			on_mouse_position_left(cursor);
 			break;
 		case D:
-			set_mouse_position_right(cursor,new_board);
+			on_mouse_position_right(cursor);
 			break;
 		case SPACE:
-			set_player_mark(cursor,new_board,turn);
-			(*turn)++;
+			on_set_player_mark(cursor,new_board,turn);
 			break;
 		case QUIT:
 			exit_game(0);

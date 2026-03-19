@@ -37,7 +37,7 @@ bool is_especial_key(char* buffer);
 
 bool is_esc_key(char* buffer);
 
-void handle_special_key_event(char new_board[BOARD_WIDTH][BOARD_HEIGHT],MousePosition* cursor,char key);
+void handle_special_key_event(MousePosition* cursor,char key);
 
 void setup_ctrl_c_signal();
 
@@ -55,17 +55,17 @@ void exit_game(int sig);
 
 void change_board_cursor_based_on_mouse_position(MousePosition*);
 
-bool set_mouse_position_up(MousePosition*,char[BOARD_WIDTH][BOARD_HEIGHT]);
+bool on_mouse_position_up(MousePosition*);
 
-bool set_mouse_position_down(MousePosition*,char[BOARD_WIDTH][BOARD_HEIGHT]);
+bool on_mouse_position_down(MousePosition*);
 
-bool set_mouse_position_left(MousePosition*,char[BOARD_WIDTH][BOARD_HEIGHT] );
+bool on_mouse_position_left(MousePosition* );
 
-bool set_mouse_position_right(MousePosition*,char[BOARD_WIDTH][BOARD_HEIGHT]);
+bool on_mouse_position_right(MousePosition*);
 
 bool is_target_position_occupied(char[BOARD_WIDTH][BOARD_HEIGHT],short int row,short column);
 
-bool set_player_mark(MousePosition* position,char board[BOARD_WIDTH][BOARD_HEIGHT],unsigned short int* turn);
+bool on_set_player_mark(MousePosition* position,char board[BOARD_WIDTH][BOARD_HEIGHT],unsigned short int* turn);
 
 
 void print_board_row(char [BOARD_WIDTH][BOARD_HEIGHT],short int index,MousePosition* cursor);

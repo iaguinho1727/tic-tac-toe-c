@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <termios.h>
-
+#include <string.h>
 static struct termios orig_termios;
 
 void restore_user_terminal(void) {
@@ -93,7 +93,7 @@ void print_board_row(char board[BOARD_WIDTH][BOARD_HEIGHT],short int row,MousePo
 	}
 }
 
-const char get_mark_based_on_turn(unsigned short int* turn)
+char get_mark_based_on_turn(unsigned short int* turn)
 {
 	return (*turn)%2==0 ? 'X' : 'O';
 }
@@ -101,8 +101,8 @@ const char get_mark_based_on_turn(unsigned short int* turn)
 
 void render_game_screen( char board[BOARD_WIDTH][BOARD_HEIGHT],MousePosition* cursor,unsigned short int* turn)
 {
-	printf("\n  " COLOR_CYAN "Tic-Tac-Toe" COLOR_GOLD "  (WASD move, SPACE place, Q quit)\n"COLOR_RESET);
-	const char current_player = get_mark_based_on_turn(turn);
+	printf("\n  " COLOR_CYAN "Tic-Tac-Toe" COLOR_GOLD "  (WASD or ARROW KEYS to move, SPACE place, Q quit)\n"COLOR_RESET);
+	char current_player = get_mark_based_on_turn(turn);
 	printf(COLOR_CYAN"  Player Turn: %s %c" COLOR_RESET " \n\n",get_mark_color(current_player), current_player);
 	for(short int row=0;row<BOARD_WIDTH;row++)
 	{
@@ -199,7 +199,7 @@ bool set_player_mark(MousePosition* position,char board[BOARD_WIDTH][BOARD_HEIGH
 	return true;
 }
 
-char get_winner(char new_board[BOARD_WIDTH][BOARD_HEIGHT])
+bool get_winner(char new_board[BOARD_WIDTH][BOARD_HEIGHT],char current_player)
 {
 	unsigned short int occorences=0;
 	for(unsigned short int r=0;r<BOARD_WIDTH;r++)
@@ -207,41 +207,95 @@ char get_winner(char new_board[BOARD_WIDTH][BOARD_HEIGHT])
 		occorences=0;
 		for(unsigned short int c=0;c<BOARD_HEIGHT;c++)
 		{
-
+			if(new_board[r][c]==current_player)
+			{
+				occorences++;
+			}
 		}
+		if(occorences==BOARD_WIDTH)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool is_especial_key(char* buffer)
+{
+	return strncmp("\033[",buffer,2)==0;
+}
+
+bool is_esc_key(char* buffer)
+{
+	return strncmp("\033",buffer,1)==0;
+}
+
+void handle_special_key_event(char new_board[BOARD_WIDTH][BOARD_HEIGHT],
+	MousePosition* cursor,char key)
+{
+	switch (key)
+	{
+	case UP:
+		set_mouse_position_up(cursor,new_board);
+
+		break;
+	case DOWN:
+		set_mouse_position_down(cursor,new_board);
+		break;
+	case LEFT:
+		set_mouse_position_left(cursor,new_board);
+		break;
+	case RIGHT:
+		set_mouse_position_right(cursor,new_board);
+		break;
 	}
 }
 
-void wait_for_user_input( char new_board[BOARD_WIDTH][BOARD_HEIGHT],MousePosition* position,unsigned short int* turn)
+bool handle_player_input( char new_board[BOARD_WIDTH][BOARD_HEIGHT],
+	MousePosition* cursor,unsigned short int* turn)
 {
-	char command=toupper(getchar());
-	switch (command)
+	char buffer[3]={0};
+	read(0,buffer,sizeof(buffer));
+	bool has_esc_sequence=is_esc_key(buffer);
+	bool special_key=is_especial_key(buffer);
+	if(has_esc_sequence && !special_key)
 	{
-		case UP:
-			set_mouse_position_up(position,new_board);
+		exit_game(0);
+		return true;
+	}else if(special_key)
+	{
+
+		handle_special_key_event(new_board,cursor,buffer[2]);
+		return true;
+
+	}
+	const char upper_cased_input=toupper(buffer[0]);
+	switch (upper_cased_input)
+	{
+		case W:
+			set_mouse_position_up(cursor,new_board);
 
 			break;
-		case DOWN:
-			set_mouse_position_down(position,new_board);
+		case S:
+			set_mouse_position_down(cursor,new_board);
 			break;
-		case LEFT:
-			set_mouse_position_left(position,new_board);
+		case A:
+			set_mouse_position_left(cursor,new_board);
 			break;
-		case RIGHT:
-			set_mouse_position_right(position,new_board);
+		case D:
+			set_mouse_position_right(cursor,new_board);
 			break;
 		case SPACE:
-			set_player_mark(position,new_board,turn);
+			set_player_mark(cursor,new_board,turn);
 			(*turn)++;
 			break;
 		case QUIT:
-		case ESC:
 			exit_game(0);
+			break;
 
-
-		default:
 
 	}
+	return true;
 
 
 }
@@ -260,6 +314,6 @@ void run_game_loop()
 	{
 		clear_screen();
 		render_game_screen(new_board,&position,&turn);
-		wait_for_user_input(new_board,&position,&turn);
+		handle_player_input(new_board,&position,&turn);
 	}
 }

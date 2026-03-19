@@ -20,14 +20,24 @@ typedef struct MousePosition{
 }MousePosition;
 
 typedef enum KeyboardControls{
-	UP='W', // W
-	DOWN='S',  // S
-	LEFT='A',
-	RIGHT='D',
+	W='W', // W
+	S='S',  // S
+	A='A',
+	D='D',
 	SPACE=' ',
 	QUIT='Q',
-	ESC=27
+	ESC=27,
+	UP='A',
+	DOWN='B',
+	RIGHT='C',
+	LEFT='D'
 }KeyboardControls;
+
+bool is_especial_key(char* buffer);
+
+bool is_esc_key(char* buffer);
+
+void handle_special_key_event(char new_board[BOARD_WIDTH][BOARD_HEIGHT],MousePosition* cursor,char key);
 
 void setup_ctrl_c_signal();
 
@@ -39,7 +49,7 @@ void print_highlight(const char item);
 
 void render_game_screen( char[BOARD_WIDTH][BOARD_HEIGHT],MousePosition* cursor ,unsigned short int*);
 
-const char get_mark_based_on_turn(unsigned short int* turn);
+char get_mark_based_on_turn(unsigned short int* turn);
 
 void exit_game(int sig);
 
@@ -62,7 +72,7 @@ void print_board_row(char [BOARD_WIDTH][BOARD_HEIGHT],short int index,MousePosit
 
 bool print_line();
 
-void wait_for_user_input( char[BOARD_WIDTH][BOARD_HEIGHT],MousePosition*,unsigned short int* turn);
+bool handle_player_input( char[BOARD_WIDTH][BOARD_HEIGHT],MousePosition*,unsigned short int* turn);
 
 void print_column();
 

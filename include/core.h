@@ -30,7 +30,8 @@ typedef enum KeyboardControls{
 	UP='A',
 	DOWN='B',
 	RIGHT='C',
-	LEFT='D'
+	LEFT='D',
+	RESET='R'
 }KeyboardControls;
 
 bool is_especial_key(char* buffer);
@@ -79,5 +80,7 @@ void print_column();
 void restore_user_terminal();
 
 void enable_raw_input();
+
+void on_reset_board(char new_board[BOARD_WIDTH][BOARD_HEIGHT],unsigned short int* turn);
 
 #endif

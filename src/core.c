@@ -44,7 +44,7 @@ bool print_line()
 	return true;
 }
 
-void fill_board(char board[BOARD_WIDTH][BOARD_HEIGHT])
+void initialize_board(char board[BOARD_WIDTH][BOARD_HEIGHT])
 {
 	for(short int r=0;r<BOARD_WIDTH;r++)
 	{
@@ -101,7 +101,7 @@ char get_mark_based_on_turn(unsigned short int* turn)
 
 void render_game_screen( char board[BOARD_WIDTH][BOARD_HEIGHT],MousePosition* cursor,unsigned short int* turn)
 {
-	printf("\n  " COLOR_CYAN "Tic-Tac-Toe" COLOR_GOLD "  (WASD or ARROW KEYS to move, SPACE place, Q quit)\n"COLOR_RESET);
+	printf("\n  " COLOR_CYAN "Tic-Tac-Toe" COLOR_GOLD "  (WASD or ARROW KEYS to move, SPACE place, Q quit, R reset)\n"COLOR_RESET);
 	char current_player = get_mark_based_on_turn(turn);
 	printf(COLOR_CYAN"  Player Turn: %s %c" COLOR_RESET " \n\n",get_mark_color(current_player), current_player);
 	for(short int row=0;row<BOARD_WIDTH;row++)
@@ -231,6 +231,12 @@ void handle_special_key_event(MousePosition* cursor,char key)
 	}
 }
 
+void on_reset_board(char new_board[BOARD_WIDTH][BOARD_HEIGHT],unsigned short int* turn)
+{
+	*turn=0;
+	initialize_board(new_board);
+}
+
 bool handle_player_input( char new_board[BOARD_WIDTH][BOARD_HEIGHT],
 	MousePosition* cursor,unsigned short int* turn)
 {
@@ -268,6 +274,9 @@ bool handle_player_input( char new_board[BOARD_WIDTH][BOARD_HEIGHT],
 		case SPACE:
 			on_set_player_mark(cursor,new_board,turn);
 			break;
+		case RESET:
+			on_reset_board(new_board,turn);
+			break;
 		case QUIT:
 			exit_game(0);
 			break;
@@ -283,7 +292,7 @@ bool handle_player_input( char new_board[BOARD_WIDTH][BOARD_HEIGHT],
 void run_game_loop()
 {
 	char new_board[BOARD_WIDTH][BOARD_HEIGHT]={0};
-	fill_board(new_board);
+	initialize_board(new_board);
 
 	MousePosition position;
 	position.column=0;

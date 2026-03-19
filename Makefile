@@ -35,6 +35,9 @@ $(OUT_DIR):
 valgrind:
 	valgrind $(EXECUTABLE_DESTINATION)
 
+gdb:
+	gdb ./$(EXECUTABLE_DESTINATION)
+
 run:
 	./$(EXECUTABLE_DESTINATION)
 
@@ -49,4 +52,4 @@ clean:
 	rm  $(EXECUTABLE_DESTINATION)
 
 # Phony targets
-.PHONY: all clean valgrind install uninstall
+.PHONY: all clean valgrind install uninstall gdb

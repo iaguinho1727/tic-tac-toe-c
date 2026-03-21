@@ -22,18 +22,15 @@ SRCS =$(foreach ext,$(SRC_EXTENSIONS),$(wildcard $(SRC_DIR)/*.$(ext)) )
 OBJS=$(SRCS:$(SRC_DIR)/%.$(SRC_EXTENSIONS)=$(OBJ_DIR)/%.$(OBJ_EXTENSION))
 ASMS=$(SRCS:$(SRC_DIR)/%.$(SRC_EXTENSIONS)=$(ASM_DIR)/%.$(NASM_EXTENSION))
 
-
+VALGRIND_FLAGS=--leak-check=full
 CFLAGS =-O3 -Wall -Wextra -I$(INCLUDE_DIR)
 EXECUTABLE_DESTINATION=$(OUT_DIR)/$(EXECUTABLE_BASENAME)
 NASM_FLAGS=-masm=intel -fno-asynchronous-unwind-tables -fno-ident
 
 all: $(EXECUTABLE_DESTINATION)
 
-$(EXECUTABLE_DESTINATION): $(SRCS) | $(OUT_DIR)
+$(EXECUTABLE_DESTINATION): $(OBJS) | $(OUT_DIR)
 	$(CC) $(CFLAGS) $^ $(LDFLAGS) -o $@
-
-
-obj: $(OBJS)
 
 asm: $(ASMS)
 
@@ -54,7 +51,7 @@ $(OUT_DIR):
 
 
 valgrind:
-	valgrind $(EXECUTABLE_DESTINATION)
+	valgrind $(VALGRIND_FLAGS) $(EXECUTABLE_DESTINATION)
 
 gdb:
 	gdb ./$(EXECUTABLE_DESTINATION)
@@ -73,4 +70,4 @@ clean:
 	rm -rf $(OUT_DIR)
 
 # Phony targets
-.PHONY: all clean valgrind install uninstall gdb asm obj
+.PHONY: all clean valgrind install uninstall gdb asm

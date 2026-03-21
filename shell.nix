@@ -13,6 +13,6 @@ pkgs.mkShell {
   # Optional: automatically create and activate a virtual environment
   shellHook = ''
     make -j 4
-    sudo make install
+    echo "Run 'sudo make install' to install system-wide"
   '';
 }

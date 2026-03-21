@@ -1,5 +1,5 @@
 #include "core.h"
-int main()
+int main(void)
 {
 	setup_ctrl_c_signal();
 	enable_raw_input();

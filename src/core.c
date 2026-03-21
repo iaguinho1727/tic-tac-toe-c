@@ -7,30 +7,47 @@
 #include <ctype.h>
 #include <termios.h>
 #include <string.h>
+#include <errno.h>
 static struct termios orig_termios;
-volatile sig_atomic_t is_runnig = true;
+volatile sig_atomic_t is_running = true;
 
 void restore_user_terminal(void) {
-    tcsetattr(STDIN_FILENO, TCSANOW, &orig_termios);
+    int restored_terminal_result=tcsetattr(STDIN_FILENO, TCSANOW, &orig_termios);
+    if(restored_terminal_result==-1)
+    {
+	perror(COLORED_MESSAGE(COLOR_RED,"Failed to restore user's terminal"));
+	exit(EXIT_FAILURE);
+    }
 }
 
 void enable_raw_input(void) {
-    tcgetattr(STDIN_FILENO, &orig_termios);
-    atexit(restore_user_terminal);
+    int terminal_copy_result=tcgetattr(STDIN_FILENO, &orig_termios);
+    if(terminal_copy_result==-1)
+    {
+	perror(COLORED_MESSAGE(COLOR_RED,"Failed to make a copy of user's terminal"));
+	exit(EXIT_FAILURE);
+    }
     struct termios raw = orig_termios;
     raw.c_lflag &= ~(ECHO | ICANON);   /* no echo, read char-by-char */
     raw.c_cc[VMIN]  = 1;
-    raw.c_cc[VTIME] = 0;
-    tcsetattr(STDIN_FILENO, TCSANOW, &raw);
+    raw.c_cc[VTIME] = 1;
+    int new_terminal_result= tcsetattr(STDIN_FILENO, TCSANOW, &raw);
+    if(new_terminal_result==-1)
+    {
+	perror(COLORED_MESSAGE(COLOR_RED,"Failed to apply raw mode to user's current terminal"));
+	exit(EXIT_FAILURE);
+    }
 }
 
 void exit_game(int sig)
 {
-	printf(COLOR_RED"\nExiting game... Received signal %d\n"COLOR_RESET, sig);
-	is_runnig=false;
+	(void)sig;
+	const char exit_message[]=COLORED_MESSAGE(COLOR_RED,"\nExiting game...\n");
+	write(STDERR_FILENO,exit_message,sizeof(exit_message)-1);
+	is_running=false;
 }
 
-void setup_ctrl_c_signal()
+void setup_ctrl_c_signal(void)
 {
 	struct sigaction sa = {0};
 	sa.sa_handler = exit_game;
@@ -39,14 +56,13 @@ void setup_ctrl_c_signal()
 	sigaction(SIGINT, &sa, NULL);
 }
 
-void print_column()
+void print_column(void)
 {
-	printf("|");
+	PRINT_COLORED(COLOR_GOLD,"|");
 }
-bool print_line()
+void print_line(void)
 {
 	printf(COLOR_GOLD"\t---+---+---\n"COLOR_RESET);
-	return true;
 }
 
 void initialize_board(Game* game)
@@ -60,7 +76,7 @@ void initialize_board(Game* game)
 	}
 }
 
-void clear_screen()
+void clear_screen(void)
 {
 	printf(CLEAR_CODE);
 }
@@ -76,7 +92,7 @@ const char* get_mark_color(char item)
 
 void print_board_row(Game* game,short int row)
 {
-	const MousePosition* cursor=&(game->cursor);
+	const CursorPosition* cursor=&(game->cursor);
 	for(short int column=0;column<BOARD_HEIGHT;column++)
 	{
 		const char item=game->board[row][column];
@@ -93,7 +109,7 @@ void print_board_row(Game* game,short int row)
 		const bool is_not_last_cell=column<BOARD_WIDTH-1;
 		if(is_not_last_cell)
 		{
-			printf(COLOR_GOLD"|"COLOR_RESET);
+			print_column();
 		}
 
 	}
@@ -123,9 +139,9 @@ void print_player_wins_message(char current_player)
 	PRINT_COLORED(COLOR_CYAN," WINS!");
 }
 
-void print_dawn_message()
+void print_draw_message(void)
 {
-	PRINT_COLORED(COLOR_RED,"  DAWN NOBODY WON!");
+	PRINT_COLORED(COLOR_RED,"  DRAW NOBODY WON!");
 }
 
 void print_current_game_state(CurrentGameState* state)
@@ -137,12 +153,12 @@ void print_current_game_state(CurrentGameState* state)
 	{
 		print_player_wins_message(PLAYER_O);
 	}
-	else if(*state==DAWN)
+	else if(*state==DRAW)
 	{
-		print_dawn_message();
+		print_draw_message();
 	}
 }
-void print_game_basic_instructions()
+void print_game_basic_instructions(void)
 {
 	printf("\n  " COLOR_CYAN "Tic-Tac-Toe" COLOR_GOLD "  (WASD or ARROW KEYS to move, SPACE place, Q quit, R reset)\n"COLOR_RESET);
 }
@@ -179,7 +195,7 @@ bool is_target_position_occupied(Game* game)
 	return game->board[game->cursor.row][game->cursor.column]!=EMPTY;
 }
 
-bool on_cursor_up(MousePosition* cursor)
+bool on_cursor_up(CursorPosition* cursor)
 {
 	const short int new_row = cursor->row - 1;
 	if(new_row< 0)
@@ -190,7 +206,7 @@ bool on_cursor_up(MousePosition* cursor)
 	return true;
 }
 
-bool on_cursor_down(MousePosition* cursor)
+bool on_cursor_down(CursorPosition* cursor)
 {
 	const short int new_row = cursor->row + 1;
 	if(new_row >= BOARD_HEIGHT)
@@ -201,7 +217,7 @@ bool on_cursor_down(MousePosition* cursor)
 	return true;
 }
 
-bool on_cursor_left(MousePosition* cursor)
+bool on_cursor_left(CursorPosition* cursor)
 {
 	const short int new_column = cursor->column - 1;
 	if(new_column<0)
@@ -212,7 +228,7 @@ bool on_cursor_left(MousePosition* cursor)
 	return true;
 }
 
-bool on_cursor_right(MousePosition* cursor)
+bool on_cursor_right(CursorPosition* cursor)
 {
 	const short int new_column = cursor->column + 1;
 	if(new_column>=BOARD_WIDTH )
@@ -260,7 +276,7 @@ bool is_board_full(Game* game)
 			counted_not_empty_cells++;
 		}
 	}
-	return counted_not_empty_cells==BOARD_HEIGHT*BOARD_HEIGHT;
+	return counted_not_empty_cells==BOARD_WIDTH*BOARD_HEIGHT;
 }
 
 
@@ -275,7 +291,7 @@ void check_current_game_state(Game* game)
 		game->event.state=PLAYER_O_WIN;
 	}else if(is_board_full(game))
 	{
-		game->event.state=DAWN;
+		game->event.state=DRAW;
 	}else{
 		game->event.state=NOT_ENDED;
 	}
@@ -286,16 +302,16 @@ bool has_won_horizontally(Game* game,char current_player)
 
 	for(unsigned short int r=0;r<BOARD_WIDTH;r++)
 	{
-		unsigned short int occorences=0;
+		unsigned short int occorrences=0;
 		for(unsigned short int c=0;c<BOARD_HEIGHT;c++)
 		{
 			if(game->board[r][c]!=current_player)
 			{
 				continue;
 			}
-			occorences++;
+			occorrences++;
 		}
-		if(occorences==WIN_OCORRENCES) return true;
+		if(occorrences==WIN_OCCURRENCES) return true;
 	}
 	return false;
 
@@ -306,16 +322,16 @@ bool has_won_vertically(Game* game, char current_player)
 
 	for(unsigned short int r=0;r<BOARD_WIDTH;r++)
 	{
-		unsigned short int ocorrences=0;
+		unsigned short int occorrences=0;
 		for(unsigned short int c=0;c<BOARD_HEIGHT;c++)
 		{
 			if(game->board[c][r]!=current_player)
 			{
 				continue;
 			}
-			ocorrences++;
+			occorrences++;
 		}
-		if(ocorrences==WIN_OCORRENCES) return true;
+		if(occorrences==WIN_OCCURRENCES) return true;
 	}
 	return false;
 
@@ -323,12 +339,18 @@ bool has_won_vertically(Game* game, char current_player)
 
 bool has_won_diagonally(Game* game,char current_player)
 {
-	const bool fisrt_diagonal=game->board[0][0]==current_player &&
-	 game->board[1][1]==current_player &&
-	  game->board[2][2]==current_player;
+	bool main_diagonal=true;
+	for(unsigned short int i=0;i<BOARD_WIDTH && main_diagonal;i++)
+	{
+		main_diagonal=game->board[i][i]==current_player;
+	}
+	bool anti_diagonal=true;
+	for(unsigned short int i=0;i<BOARD_WIDTH && anti_diagonal;i++)
+	{
+		anti_diagonal=game->board[i][BOARD_WIDTH-1-i]==current_player;
+	}
 
-	const bool second_diagonal=game->board[0][2]==current_player && game->board[1][1]==current_player && game->board[2][0]==current_player;
-	return fisrt_diagonal || second_diagonal;
+	return main_diagonal || anti_diagonal;
 
 }
 
@@ -338,7 +360,7 @@ bool is_there_winner(Game* game,char current_player)
 	|| has_won_diagonally(game,current_player);
 }
 
-bool is_especial_key(char* buffer)
+bool is_special_key(char* buffer)
 {
 	return strncmp("\033[",buffer,2)==0;
 }
@@ -365,11 +387,10 @@ void handle_special_key_event(GameEvent* event)
 	case RIGHT_ARROW:
 		event->key=RIGHT;
 		break;
+	default:
+		event->key=UNKNOWN;
+		break;
 	}
-}
-void reset_turn(Game* game)
-{
-	game->current_player=FIRST_PLAYER_TURN;
 }
 
 void on_reset_game(Game* game)
@@ -387,7 +408,7 @@ void handle_game_events(Game* game)
 
 }
 
-bool handle_keyboard_events(Game* game)
+void handle_keyboard_events(Game* game)
 {
 	switch (game->event.key)
 	{
@@ -416,23 +437,34 @@ bool handle_keyboard_events(Game* game)
 	default:
 		break;
 	}
-	return true;
 }
 
-bool check_keyboard_event( Game* game)
+void check_keyboard_event( Game* game)
 {
-	read(0,game->event.key_buffer,sizeof(game->event.key_buffer));
+	memset(game->event.key_buffer,0,sizeof(game->event.key_buffer));
+	ssize_t bytes_read= read(0,game->event.key_buffer,sizeof(game->event.key_buffer));
+	if(bytes_read<=0)
+	{
+		is_running=false;
+		return;
+	}
+	if(bytes_read==-1 && errno!=EINTR)
+	{
+		perror(COLORED_MESSAGE(COLOR_RED,"\nFailed to read bytes from stdin  "));
+		is_running=false;
+		return;
+	}
 	bool has_esc_sequence=is_esc_key(game->event.key_buffer);
-	bool special_key=is_especial_key(game->event.key_buffer);
+	bool special_key=is_special_key(game->event.key_buffer);
 	if(has_esc_sequence && !special_key)
 	{
 		game->event.key=QUIT;
-		return true;
+		return;
 	}else if(special_key)
 	{
 
 		handle_special_key_event(&(game->event));
-		return true;
+		return;
 
 	}
 	const char upper_cased_input=toupper(game->event.key_buffer[0]);
@@ -460,10 +492,11 @@ bool check_keyboard_event( Game* game)
 		case Q_KEY:
 			game->event.key=QUIT;
 			break;
+		default:
+			game->event.key=UNKNOWN;
 
 
 	}
-	return true;
 
 
 }
@@ -480,7 +513,6 @@ void initialize_game(Game* game)
 			.state=NOT_ENDED
 		},
 		.current_player=FIRST_PLAYER_TURN,
-		.board={{0}}
 
 	};
 
@@ -490,7 +522,7 @@ void initialize_game(Game* game)
 
 void run_game_loop(Game* new_game)
 {
-	while(is_runnig)
+	while(is_running)
 	{
 		clear_screen();
 		render_game_screen(new_game);

@@ -1,19 +1,19 @@
 # Basic Makefile for static or shared C library
 
 # Compiler and archiver
-CC = gcc
-LIBS=
-LDFLAGS=
+CC = @CC@
+LIBS=@LIBS@
+LDFLAGS=@LDFLAGS@
 # Directories
 SRC_DIR = src
 OUT_DIR = out
 OBJ_DIR=$(OUT_DIR)/obj
 ASM_DIR=$(OUT_DIR)/asm
 INCLUDE_DIR = include
-INSTALLATION_DIR=/usr/local/bin
+INSTALLATION_DIR=@DESTDIR@
 INSTALL=@INSTALL@
 
-EXECUTABLE_BASENAME = TicTacToe
+EXECUTABLE_BASENAME = @PACKAGE_NAME@
 
 SRC_EXTENSIONS=c
 OBJ_EXTENSION=o

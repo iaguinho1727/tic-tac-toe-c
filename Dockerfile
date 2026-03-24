@@ -4,10 +4,11 @@ WORKDIR /app
 
 COPY src/ src/
 COPY include/ include/
-COPY Makefile .
+COPY Makefile.in .
+COPY configure.ac .
 
 
-RUN make -j$(nproc)
+RUN autoconf && ./configure && make -j$(nproc)
 
 
 

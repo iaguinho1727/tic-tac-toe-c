@@ -1,6 +1,6 @@
 # Maintainer: Iago Arantes <iago.arantes1727@gmail.com>
 pkgname=tic-tac-toe-c
-pkgver=0.0.1
+pkgver=0.0.2
 pkgrel=1
 pkgdesc="Terminal-based Tic Tac Toe game in C with WASD/arrow key controls"
 arch=('x86_64')

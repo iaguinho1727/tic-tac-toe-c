@@ -6,7 +6,9 @@
 *.ko
 *.obj
 *.elf
-
+*.tar
+*.pkg.tar.zst
+*.tar.gz
 # Linker output
 *.ilk
 *.map

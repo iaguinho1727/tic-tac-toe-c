@@ -10,7 +10,9 @@ OUT_DIR = out
 OBJ_DIR=$(OUT_DIR)/obj
 ASM_DIR=$(OUT_DIR)/asm
 INCLUDE_DIR = include
-INSTALLATION_DIR=@DESTDIR@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+bindir=@bindir@
 INSTALL=@INSTALL@
 
 EXECUTABLE_BASENAME = @PACKAGE_NAME@
@@ -60,10 +62,10 @@ run:
 	./$(EXECUTABLE_DESTINATION)
 
 install:
-	$(INSTALL) $(EXECUTABLE_DESTINATION) $(INSTALLATION_DIR)
+	$(INSTALL) -Dm755 $(EXECUTABLE_DESTINATION) $(bindir)
 
 uninstall:
-	rm -f $(INSTALLATION_DIR)/$(EXECUTABLE_BASENAME)
+	rm -f $(bindir)/$(EXECUTABLE_BASENAME)
 
 # Clean up
 clean:

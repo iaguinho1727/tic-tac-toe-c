@@ -61,3 +61,4 @@ autom4te.cache/
 config.status
 config.log
 Makefile
+configure~

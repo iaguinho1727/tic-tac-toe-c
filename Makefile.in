@@ -62,7 +62,7 @@ run:
 	./$(EXECUTABLE_DESTINATION)
 
 install:
-	$(INSTALL) -Dm755 $(EXECUTABLE_DESTINATION) $(bindir)
+	$(INSTALL) -Dm755 $(EXECUTABLE_DESTINATION) $(DESTDIR)$(bindir)
 
 uninstall:
 	rm -f $(DESTDIR)$(bindir)/$(EXECUTABLE_BASENAME)

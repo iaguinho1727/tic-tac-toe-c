@@ -9,6 +9,7 @@
 *.tar
 *.pkg.tar.zst
 *.tar.gz
+pkg
 # Linker output
 *.ilk
 *.map

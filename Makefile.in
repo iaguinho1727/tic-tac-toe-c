@@ -65,7 +65,7 @@ install:
 	$(INSTALL) -Dm755 $(EXECUTABLE_DESTINATION) $(bindir)
 
 uninstall:
-	rm -f $(bindir)/$(EXECUTABLE_BASENAME)
+	rm -f $(DESTDIR)$(bindir)/$(EXECUTABLE_BASENAME)
 
 # Clean up
 clean:

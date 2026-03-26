@@ -1,11 +1,26 @@
 name: tictactoe
 services:
   tictactoe:
+    container_name: tictactoe-c
     stdin_open: true
     tty: true
-    build: .
+    build:
+      target: game
     volumes:
       - .:/app
       - /app/out
+  web:
+    container_name: tictactoe-web
+    image: nginx
+    ports:
+      - ${WEB_PORT}:80
+    volumes:
+      - ./out:/usr/share/nginx/html:ro
+  # web2:
+  #   container_name: tictactoe-web
+  #   build:
+  #     target: web
+  #   ports:
+  #     - ${WEB_PORT}:80
 
 

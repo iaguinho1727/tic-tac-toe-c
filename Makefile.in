@@ -14,8 +14,8 @@ prefix=@prefix@
 exec_prefix=@exec_prefix@
 bindir=@bindir@
 INSTALL=@INSTALL@
-
 EXECUTABLE_BASENAME = @PACKAGE_NAME@
+
 
 SRC_EXTENSION=c
 OBJ_EXTENSION=o
@@ -23,12 +23,19 @@ ASM_EXTENSION=s
 SRCS =$(wildcard $(SRC_DIR)/*.$(SRC_EXTENSION))
 ASMS=$(SRCS:$(SRC_DIR)/%.$(SRC_EXTENSION)=$(ASM_DIR)/%.$(ASM_EXTENSION))
 OBJS=$(ASMS:$(ASM_DIR)/%.$(ASM_EXTENSION)=$(OBJ_DIR)/%.$(OBJ_EXTENSION))
+EXECUTABLE_DESTINATION=$(OUT_DIR)/$(EXECUTABLE_BASENAME)
 
 
 VALGRIND_FLAGS=--leak-check=full
 CFLAGS =-O3 -Wall -Wextra -I$(INCLUDE_DIR)
-EXECUTABLE_DESTINATION=$(OUT_DIR)/$(EXECUTABLE_BASENAME)
 ASM_FLAGS=-masm=intel -fverbose-asm -fno-stack-protector -fno-asynchronous-unwind-tables -fno-ident
+
+
+ifneq  ( $(or $(EMSCRIPTEN), $(findstring emcc,$(CC))),)
+EXECUTABLE_BASENAME=index.html
+ASM_FLAGS=-fverbose-asm -fno-stack-protector -fno-asynchronous-unwind-tables -fno-ident
+
+endif
 
 all: $(ASM_DIR) $(OBJ_DIR) $(EXECUTABLE_DESTINATION)
 
@@ -36,7 +43,7 @@ $(EXECUTABLE_DESTINATION): $(OBJS)
 	$(CC) $(CFLAGS) $^ $(LDFLAGS) -o $@ $(LIBS)
 
 $(OBJ_DIR)/%.$(OBJ_EXTENSION) : $(ASM_DIR)/%.$(ASM_EXTENSION)
-	$(CC) $(CFLAGS) -c $< -o $@ $(LIBS)
+	$(CC) -c $< -o $@
 
 $(ASM_DIR)/%.$(ASM_EXTENSION) : $(SRC_DIR)/%.$(SRC_EXTENSION)
 	$(CC) $(CFLAGS) $(ASM_FLAGS) -S $< -o $@ $(LIBS)

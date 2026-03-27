@@ -58,7 +58,7 @@ dkms.conf
 .vscode
 .idea
 out/
-
+*.wasm
 # Autoconf
 autom4te.cache/
 config.status
@@ -66,3 +66,4 @@ config.log
 Makefile
 configure~
 .env
+.claude

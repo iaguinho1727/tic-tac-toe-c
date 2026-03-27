@@ -34,7 +34,7 @@ ASM_FLAGS=-masm=intel -fverbose-asm -fno-stack-protector -fno-asynchronous-unwin
 ifneq  ( $(or $(EMSCRIPTEN), $(findstring emcc,$(CC))),)
 EXECUTABLE_BASENAME=index.html
 ASM_FLAGS=-fverbose-asm -fno-stack-protector -fno-asynchronous-unwind-tables -fno-ident
-
+LDFLAGS+= --shell-file src/wasm/shell.html
 endif
 
 all: $(ASM_DIR) $(OBJ_DIR) $(EXECUTABLE_DESTINATION)

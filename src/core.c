@@ -1,16 +1,23 @@
 #include "core.h"
 #include <stdio.h>
-#include <unistd.h>
-#include <signal.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <termios.h>
 #include <string.h>
 #include <errno.h>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#include <emscripten/html5.h>
+volatile bool is_running = true;
+#else
+#include <unistd.h>
+#include <termios.h>
+#include <signal.h>
 static struct termios orig_termios;
 volatile sig_atomic_t is_running = true;
+#endif
 
+#ifndef __EMSCRIPTEN__
 void restore_user_terminal(void) {
     int restored_terminal_result=tcsetattr(STDIN_FILENO, TCSANOW, &orig_termios);
     if(restored_terminal_result==-1)
@@ -39,14 +46,6 @@ void enable_raw_input(void) {
     }
 }
 
-void exit_game(int sig)
-{
-	(void)sig;
-	const char exit_message[]=COLORED_MESSAGE(COLOR_RED,"\nExiting game...\n");
-	write(STDERR_FILENO,exit_message,sizeof(exit_message)-1);
-	is_running=false;
-}
-
 void setup_ctrl_c_signal(void)
 {
 	struct sigaction sa = {0};
@@ -54,6 +53,13 @@ void setup_ctrl_c_signal(void)
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = 0;
 	sigaction(SIGINT, &sa, NULL);
+}
+#endif
+
+void exit_game(int sig)
+{
+	(void)sig;
+	is_running=false;
 }
 
 void print_column(void)
@@ -160,7 +166,12 @@ void print_current_game_state(CurrentGameState* state)
 }
 void print_game_basic_instructions(void)
 {
-	printf("\n  " COLOR_CYAN "Tic-Tac-Toe" COLOR_GOLD "  (WASD or ARROW KEYS to move, SPACE place, Q quit, R reset)\n"COLOR_RESET);
+	PRINT_COLORED(COLOR_CYAN,"\n  "  "Tic-Tac-Toe");
+#ifndef __EMSCRIPTEN__
+	PRINT_COLORED(COLOR_GOLD,"  (WASD or ARROW KEYS to move, SPACE place, Q quit, R reset)\n");
+#else
+	PRINT_COLORED(COLOR_GOLD,"  (WASD or ARROW KEYS to move, SPACE place, R reset)\n");
+#endif
 }
 
 
@@ -398,6 +409,7 @@ void on_reset_game(Game* game)
 	initialize_game(game);
 }
 
+#ifndef __EMSCRIPTEN__
 void handle_game_events(Game* game)
 {
 	check_keyboard_event(game);
@@ -407,6 +419,7 @@ void handle_game_events(Game* game)
 	check_current_game_state(game);
 
 }
+#endif
 
 void handle_keyboard_events(Game* game)
 {
@@ -439,6 +452,40 @@ void handle_keyboard_events(Game* game)
 	}
 }
 
+#ifdef __EMSCRIPTEN__
+EM_BOOL on_keydown(int event_type, const EmscriptenKeyboardEvent *e, void *user_data)
+{
+	(void)event_type;
+	Game *game = (Game *)user_data;
+
+	if (strcmp(e->key, "ArrowUp") == 0 || strcmp(e->key, "w") == 0 || strcmp(e->key, "W") == 0)
+		game->event.key = UP;
+	else if (strcmp(e->key, "ArrowDown") == 0 || strcmp(e->key, "s") == 0 || strcmp(e->key, "S") == 0)
+		game->event.key = DOWN;
+	else if (strcmp(e->key, "ArrowLeft") == 0 || strcmp(e->key, "a") == 0 || strcmp(e->key, "A") == 0)
+		game->event.key = LEFT;
+	else if (strcmp(e->key, "ArrowRight") == 0 || strcmp(e->key, "d") == 0 || strcmp(e->key, "D") == 0)
+		game->event.key = RIGHT;
+	else if (strcmp(e->key, " ") == 0)
+		game->event.key = MARK;
+	else if (strcmp(e->key, "r") == 0 || strcmp(e->key, "R") == 0)
+		game->event.key = RESET;
+	else
+		game->event.key = UNKNOWN;
+
+	return EM_TRUE;
+}
+
+static void run_emscripten_game_loop(void *arg)
+{
+	Game *game = (Game *)arg;
+	clear_screen();
+	render_game_screen(game);
+	handle_keyboard_events(game);
+	check_current_game_state(game);
+	game->event.key = UNKNOWN;
+}
+#else
 void check_keyboard_event( Game* game)
 {
 	memset(game->event.key_buffer,0,sizeof(game->event.key_buffer));
@@ -500,6 +547,7 @@ void check_keyboard_event( Game* game)
 
 
 }
+#endif
 
 void initialize_game(Game* game)
 {
@@ -522,10 +570,15 @@ void initialize_game(Game* game)
 
 void run_game_loop(Game* new_game)
 {
+#ifdef __EMSCRIPTEN__
+	emscripten_set_keydown_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT, new_game, 0, on_keydown);
+	emscripten_set_main_loop_arg(run_emscripten_game_loop, new_game, 0, 1);
+#else
 	while(is_running)
 	{
 		clear_screen();
 		render_game_screen(new_game);
 		handle_game_events(new_game);
 	}
+#endif
 }

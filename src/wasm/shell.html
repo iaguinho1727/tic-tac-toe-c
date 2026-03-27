@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Tic-Tac-Toe</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.min.css">
+	<style>
+		body {
+			margin: 0;
+			background: #1e1e1e;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 100vh;
+		}
+		#terminal {
+			width: 600px;
+			height: 400px;
+		}
+	</style>
+</head>
+<body>
+	<div id="terminal"></div>
+
+	<script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/lib/addon-fit.min.js"></script>
+	<script>
+		var term = new Terminal({
+			cols: 60,
+			rows: 20,
+			cursorBlink: false,
+			disableStdin: true,
+			theme: {
+				background: '#1e1e1e'
+			}
+		});
+		var fitAddon = new FitAddon.FitAddon();
+		term.loadAddon(fitAddon);
+		term.open(document.getElementById('terminal'));
+		fitAddon.fit();
+
+		var Module = {
+			preRun: [],
+			postRun: [],
+			print: function(text) {
+				term.writeln(text);
+			},
+			printErr: function(text) {
+				term.writeln(text);
+			},
+			canvas: null,
+			setStatus: function(text) {},
+			monitorRunDependencies: function(left) {}
+		};
+		window.Module = Module;
+	</script>
+	{{{ SCRIPT }}}
+</body>
+</html>

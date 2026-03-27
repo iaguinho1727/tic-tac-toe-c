@@ -69,72 +69,72 @@ typedef struct Game{
 
 
 
-bool is_special_key(char* buffer);
+extern bool is_special_key(char* buffer);
 
-bool is_esc_key(char* buffer);
+extern bool is_esc_key(char* buffer);
 
-void handle_special_key_event(GameEvent*);
+extern void handle_special_key_event(GameEvent*);
 
-void setup_ctrl_c_signal(void);
+extern void setup_ctrl_c_signal(void);
 
-void run_game_loop(Game*);
+extern void run_game_loop(Game*);
 
-void clear_screen(void);
+extern void clear_screen(void);
 
-void print_highlight(const char item);
+extern void print_highlight(const char item);
 
-void render_game_screen( Game*);
+extern void render_game_screen( Game*);
 
-void exit_game(int sig);
+extern void exit_game(int sig);
 
-void initialize_game(Game*);
+extern void initialize_game(Game*);
 
-bool on_cursor_up(CursorPosition*);
+extern bool on_cursor_up(CursorPosition*);
 
-bool on_cursor_down(CursorPosition*);
+extern bool on_cursor_down(CursorPosition*);
 
-bool on_cursor_left(CursorPosition* );
+extern bool on_cursor_left(CursorPosition* );
 
-bool on_cursor_right(CursorPosition*);
+extern bool on_cursor_right(CursorPosition*);
 
-bool is_target_position_occupied(Game*);
+extern bool is_target_position_occupied(Game*);
 
-bool on_set_player_mark(Game*);
+extern bool on_set_player_mark(Game*);
 
-void handle_keyboard_events(Game* game);
+extern void handle_keyboard_events(Game* game);
 
-void print_board_row(Game* game,short int row);
+extern void print_board_row(Game* game,short int row);
 
-void print_line(void);
+extern void print_line(void);
 
-void check_keyboard_event( Game*);
+extern void check_keyboard_event( Game*);
 
-void print_column(void);
+extern void print_column(void);
 
-void restore_user_terminal(void);
+extern void restore_user_terminal(void);
 
-void enable_raw_input(void);
+extern void enable_raw_input(void);
 
-void on_reset_game(Game*);
+extern void on_reset_game(Game*);
 
-bool is_there_winner(Game*,char);
+extern bool is_there_winner(Game*,char);
 
-void print_current_player_turn(char current_player);
+extern void print_current_player_turn(char current_player);
 
-void print_colored_mark(char current_player);
+extern void print_colored_mark(char current_player);
 
-void print_game_basic_instructions(void);
+extern void print_game_basic_instructions(void);
 
-void print_current_game_state(CurrentGameState* state);
+extern void print_current_game_state(CurrentGameState* state);
 
-void print_draw_message(void);
+extern void print_draw_message(void);
 
-void print_player_wins_message(char current_player);
+extern void print_player_wins_message(char current_player);
 
-bool has_won_diagonally(Game* game,char current_player);
+extern bool has_won_diagonally(Game* game,char current_player);
 
-bool has_won_vertically(Game* game, char current_player);
+extern bool has_won_vertically(Game* game, char current_player);
 
-bool has_won_horizontally(Game* game,char current_player);
+extern bool has_won_horizontally(Game* game,char current_player);
 
 #endif

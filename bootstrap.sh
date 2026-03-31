@@ -2,4 +2,4 @@
 
 set -e
 
-autoreconf --install && ./configure
+autoreconf --install && ./configure && make clean

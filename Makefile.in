@@ -77,6 +77,9 @@ uninstall:
 # Clean up
 clean:
 	rm -rf $(OUT_DIR)
+	rm -rf autom4te.cache
+	rm a.wasm
+	rm configure~
 
 # Phony targets
 .PHONY: all clean valgrind install uninstall gdb

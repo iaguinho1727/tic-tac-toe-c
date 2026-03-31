@@ -15,6 +15,7 @@ exec_prefix=@exec_prefix@
 bindir=@bindir@
 INSTALL=@INSTALL@
 EXECUTABLE_BASENAME = @PACKAGE_NAME@
+WASM_DIR=$(SRC_DIR)/wasm
 
 
 SRC_EXTENSION=c
@@ -26,6 +27,7 @@ OBJS=$(ASMS:$(ASM_DIR)/%.$(ASM_EXTENSION)=$(OBJ_DIR)/%.$(OBJ_EXTENSION))
 EXECUTABLE_DESTINATION=$(OUT_DIR)/$(EXECUTABLE_BASENAME)
 
 
+
 VALGRIND_FLAGS=--leak-check=full
 CFLAGS =-O3 -Wall -Wextra -I$(INCLUDE_DIR)
 ASM_FLAGS=-masm=intel -fverbose-asm -fno-stack-protector -fno-asynchronous-unwind-tables -fno-ident
@@ -33,14 +35,15 @@ ASM_FLAGS=-masm=intel -fverbose-asm -fno-stack-protector -fno-asynchronous-unwin
 
 ifneq  ( $(or $(EMSCRIPTEN), $(findstring emcc,$(CC))),)
 EXECUTABLE_BASENAME=index.html
+SHELL_FILES=$(wildcard $(WASM_DIR)/*)
 ASM_FLAGS=-fverbose-asm -fno-stack-protector -fno-asynchronous-unwind-tables -fno-ident
-LDFLAGS+= --shell-file src/wasm/shell.html
+LDFLAGS+= --shell-file $(WASM_DIR)/shell.html
 endif
 
 all: $(ASM_DIR) $(OBJ_DIR) $(EXECUTABLE_DESTINATION)
 
-$(EXECUTABLE_DESTINATION): $(OBJS)
-	$(CC) $(CFLAGS) $^ $(LDFLAGS) -o $@ $(LIBS)
+$(EXECUTABLE_DESTINATION): $(OBJS) $(SHELL_FILES)
+	$(CC) $(CFLAGS) $(OBJS) $(LDFLAGS) -o $@ $(LIBS)
 
 $(OBJ_DIR)/%.$(OBJ_EXTENSION) : $(ASM_DIR)/%.$(ASM_EXTENSION)
 	$(CC) -c $< -o $@

@@ -33,11 +33,11 @@ CFLAGS =-O3 -Wall -Wextra -I$(INCLUDE_DIR)
 ASM_FLAGS=-masm=intel -fverbose-asm -fno-stack-protector -fno-asynchronous-unwind-tables -fno-ident
 
 
-ifneq  ( $(or $(EMSCRIPTEN), $(findstring emcc,$(CC))),)
-EXECUTABLE_BASENAME=index.html
-SHELL_FILES=$(wildcard $(WASM_DIR)/*)
-ASM_FLAGS=-fverbose-asm -fno-stack-protector -fno-asynchronous-unwind-tables -fno-ident
-LDFLAGS+= --shell-file $(WASM_DIR)/shell.html
+ifneq ($(or $(EMSCRIPTEN),$(findstring emcc,$(CC))),)
+EXECUTABLE_BASENAME = index.html
+SHELL_FILES = $(wildcard $(WASM_DIR)/*)
+ASM_FLAGS = -fverbose-asm -fno-stack-protector -fno-asynchronous-unwind-tables -fno-ident
+LDFLAGS += --shell-file $(WASM_DIR)/shell.html
 endif
 
 all: $(ASM_DIR) $(OBJ_DIR) $(EXECUTABLE_DESTINATION)

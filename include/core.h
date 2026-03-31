@@ -137,4 +137,12 @@ extern bool has_won_vertically(Game* game, char current_player);
 
 extern bool has_won_horizontally(Game* game,char current_player);
 
+
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#include <emscripten/html5.h>
+extern void run_emscripten_game_loop(void *arg);
+EM_BOOL on_keydown(int event_type, const EmscriptenKeyboardEvent *e, void *user_data);
+#endif
+
 #endif

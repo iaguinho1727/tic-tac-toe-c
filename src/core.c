@@ -453,6 +453,7 @@ void handle_keyboard_events(Game* game)
 }
 
 #ifdef __EMSCRIPTEN__
+
 EM_BOOL on_keydown(int event_type, const EmscriptenKeyboardEvent *e, void *user_data)
 {
 	(void)event_type;
@@ -476,7 +477,7 @@ EM_BOOL on_keydown(int event_type, const EmscriptenKeyboardEvent *e, void *user_
 	return EM_TRUE;
 }
 
-static void run_emscripten_game_loop(void *arg)
+void run_emscripten_game_loop(void *arg)
 {
 	Game *game = (Game *)arg;
 	clear_screen();
@@ -558,7 +559,8 @@ void initialize_game(Game* game)
 		},
 		.event={
 			.key_buffer={0},
-			.state=NOT_ENDED
+			.state=NOT_ENDED,
+			.key=UNKNOWN
 		},
 		.current_player=FIRST_PLAYER_TURN,
 
@@ -567,18 +569,14 @@ void initialize_game(Game* game)
 	initialize_board(game);
 }
 
-
+#ifndef __EMSCRIPTEN__
 void run_game_loop(Game* new_game)
 {
-#ifdef __EMSCRIPTEN__
-	emscripten_set_keydown_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT, new_game, 0, on_keydown);
-	emscripten_set_main_loop_arg(run_emscripten_game_loop, new_game, 0, 1);
-#else
 	while(is_running)
 	{
 		clear_screen();
 		render_game_screen(new_game);
 		handle_game_events(new_game);
 	}
-#endif
 }
+#endif

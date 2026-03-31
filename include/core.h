@@ -89,6 +89,8 @@ extern void exit_game(int sig);
 
 extern void initialize_game(Game*);
 
+extern const char* get_mark_color(char* item);
+
 extern bool on_cursor_up(CursorPosition*);
 
 extern bool on_cursor_down(CursorPosition*);
@@ -103,7 +105,7 @@ extern bool on_set_player_mark(Game*);
 
 extern void handle_keyboard_events(Game* game);
 
-extern void print_board_row(Game* game,short int row);
+extern void print_board_row(Game* game,short int* row);
 
 extern void print_line(void);
 
@@ -119,9 +121,9 @@ extern void on_reset_game(Game*);
 
 extern bool is_there_winner(Game*,char);
 
-extern void print_current_player_turn(char current_player);
+extern void print_current_player_turn(char* current_player);
 
-extern void print_colored_mark(char current_player);
+extern void print_colored_mark(char* current_player);
 
 extern void print_game_basic_instructions(void);
 
@@ -131,11 +133,11 @@ extern void print_draw_message(void);
 
 extern void print_player_wins_message(char current_player);
 
-extern bool has_won_diagonally(Game* game,char current_player);
+extern bool has_won_diagonally(Game* game,char* current_player);
 
-extern bool has_won_vertically(Game* game, char current_player);
+extern bool has_won_vertically(Game* game, char* current_player);
 
-extern bool has_won_horizontally(Game* game,char current_player);
+extern bool has_won_horizontally(Game* game,char* current_player);
 
 
 #ifdef __EMSCRIPTEN__

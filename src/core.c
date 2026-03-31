@@ -91,24 +91,24 @@ void print_highlight(const char item)
 {
 	printf(COLOR_CYAN START_REVERSE_VIDEO" %c "END_REVERSE_VIDEO COLOR_RESET,item);
 }
-const char* get_mark_color(char item)
+const char* get_mark_color(char* item)
 {
-	return item==PLAYER_X ? COLOR_RED : COLOR_BLUE;
+	return *item==PLAYER_X ? COLOR_RED : COLOR_BLUE;
 }
 
-void print_board_row(Game* game,short int row)
+void print_board_row(Game* game,short int* row)
 {
 	const CursorPosition* cursor=&(game->cursor);
 	for(short int column=0;column<BOARD_HEIGHT;column++)
 	{
-		const char item=game->board[row][column];
-		const bool is_cursor=(cursor->column==column && cursor->row==row);
+		char item=game->board[*row][column];
+		const bool is_cursor=(cursor->column==column && cursor->row==*row);
 		if(is_cursor && game->event.state==NOT_ENDED)
 		{
 			print_highlight(item);
 		}
 		else{
-			const char* color=get_mark_color(item);
+			const char* color=get_mark_color(&item);
 			printf("%s %c "COLOR_RESET,color,item);
 
 		}
@@ -126,7 +126,7 @@ void print_tic_tac_toe_board(Game* game)
 	for(short int row=0;row<BOARD_WIDTH;row++)
 	{
 		printf("\t");
-		print_board_row(game,row);
+		print_board_row(game,&row);
 		printf("\n");
 		if(row>=2)
 		{
@@ -141,7 +141,7 @@ void print_tic_tac_toe_board(Game* game)
 void print_player_wins_message(char current_player)
 {
 	PRINT_COLORED(COLOR_CYAN,"  Player ");
-	print_colored_mark(current_player);
+	print_colored_mark(&current_player);
 	PRINT_COLORED(COLOR_CYAN," WINS!");
 }
 
@@ -175,12 +175,12 @@ void print_game_basic_instructions(void)
 }
 
 
-void print_colored_mark(char current_player)
+void print_colored_mark(char* current_player)
 {
-	printf("%s%c"COLOR_RESET,get_mark_color(current_player),current_player);
+	printf("%s%c"COLOR_RESET,get_mark_color(current_player),*current_player);
 }
 
-void print_current_player_turn(char current_player)
+void print_current_player_turn(char* current_player)
 {
 	PRINT_COLORED(COLOR_CYAN,"  Player Turn: ");
 	print_colored_mark(current_player);
@@ -193,7 +193,7 @@ void print_current_player_turn(char current_player)
 void render_game_screen( Game* game)
 {
 	print_game_basic_instructions();
-	print_current_player_turn(game->current_player);
+	print_current_player_turn(&(game->current_player));
 	CurrentGameState state=game->event.state;
 	print_current_game_state(&state);
 	printf("\n\n");
@@ -308,7 +308,7 @@ void check_current_game_state(Game* game)
 	}
 }
 
-bool has_won_horizontally(Game* game,char current_player)
+bool has_won_horizontally(Game* game,char* current_player)
 {
 
 	for(unsigned short int r=0;r<BOARD_WIDTH;r++)
@@ -316,7 +316,7 @@ bool has_won_horizontally(Game* game,char current_player)
 		unsigned short int occorrences=0;
 		for(unsigned short int c=0;c<BOARD_HEIGHT;c++)
 		{
-			if(game->board[r][c]!=current_player)
+			if(game->board[r][c]!=*current_player)
 			{
 				continue;
 			}
@@ -328,7 +328,7 @@ bool has_won_horizontally(Game* game,char current_player)
 
 }
 
-bool has_won_vertically(Game* game, char current_player)
+bool has_won_vertically(Game* game, char* current_player)
 {
 
 	for(unsigned short int r=0;r<BOARD_WIDTH;r++)
@@ -336,7 +336,7 @@ bool has_won_vertically(Game* game, char current_player)
 		unsigned short int occorrences=0;
 		for(unsigned short int c=0;c<BOARD_HEIGHT;c++)
 		{
-			if(game->board[c][r]!=current_player)
+			if(game->board[c][r]!=*current_player)
 			{
 				continue;
 			}
@@ -348,17 +348,17 @@ bool has_won_vertically(Game* game, char current_player)
 
 }
 
-bool has_won_diagonally(Game* game,char current_player)
+bool has_won_diagonally(Game* game,char* current_player)
 {
 	bool main_diagonal=true;
 	for(unsigned short int i=0;i<BOARD_WIDTH && main_diagonal;i++)
 	{
-		main_diagonal=game->board[i][i]==current_player;
+		main_diagonal=game->board[i][i]==*current_player;
 	}
 	bool anti_diagonal=true;
 	for(unsigned short int i=0;i<BOARD_WIDTH && anti_diagonal;i++)
 	{
-		anti_diagonal=game->board[i][BOARD_WIDTH-1-i]==current_player;
+		anti_diagonal=game->board[i][BOARD_WIDTH-1-i]==*current_player;
 	}
 
 	return main_diagonal || anti_diagonal;
@@ -367,8 +367,8 @@ bool has_won_diagonally(Game* game,char current_player)
 
 bool is_there_winner(Game* game,char current_player)
 {
-	return has_won_horizontally(game,current_player) || has_won_vertically(game,current_player)
-	|| has_won_diagonally(game,current_player);
+	return has_won_horizontally(game,&current_player) || has_won_vertically(game,&current_player)
+	|| has_won_diagonally(game,&current_player);
 }
 
 bool is_special_key(char* buffer)

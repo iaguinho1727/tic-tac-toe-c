@@ -117,8 +117,6 @@ extern void restore_user_terminal(void);
 
 extern void enable_raw_input(void);
 
-extern void on_reset_game(Game*);
-
 extern bool is_there_winner(Game*,char);
 
 extern void print_current_player_turn(char* current_player);
@@ -139,6 +137,11 @@ extern bool has_won_vertically(Game* game, char* current_player);
 
 extern bool has_won_horizontally(Game* game,char* current_player);
 
+extern void initialize_board(Game* game);
+
+extern void change_turn(Game* game);
+
+extern void mark_board_cell(Game* game);
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>

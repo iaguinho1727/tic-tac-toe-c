@@ -128,11 +128,11 @@ void print_tic_tac_toe_board(Game* game)
 		printf("\t");
 		print_board_row(game,&row);
 		printf("\n");
-		if(row>=2)
+		if(row < BOARD_WIDTH - 1)
 		{
-			continue;
+			print_line();
 		}
-		print_line();
+
 
 
 	}
@@ -152,16 +152,20 @@ void print_draw_message(void)
 
 void print_current_game_state(CurrentGameState* state)
 {
-	if(*state==PLAYER_X_WIN)
+	switch (*state)
 	{
+	case PLAYER_X_WIN:
 		print_player_wins_message(PLAYER_X);
-	}else if(*state==PLAYER_O_WIN)
-	{
+		break;
+	case PLAYER_O_WIN:
 		print_player_wins_message(PLAYER_O);
-	}
-	else if(*state==DRAW)
-	{
+		break;
+	case DRAW:
 		print_draw_message();
+		break;
+
+	default:
+		break;
 	}
 }
 void print_game_basic_instructions(void)
@@ -282,7 +286,7 @@ bool is_board_full(Game* game)
 		{
 			if(game->board[r][c]==EMPTY)
 			{
-				continue;
+				return false;
 			}
 			counted_not_empty_cells++;
 		}
@@ -318,7 +322,7 @@ bool has_won_horizontally(Game* game,char* current_player)
 		{
 			if(game->board[r][c]!=*current_player)
 			{
-				continue;
+				return false;
 			}
 			occorrences++;
 		}
@@ -338,7 +342,7 @@ bool has_won_vertically(Game* game, char* current_player)
 		{
 			if(game->board[c][r]!=*current_player)
 			{
-				continue;
+				return false;
 			}
 			occorrences++;
 		}
@@ -404,11 +408,6 @@ void handle_special_key_event(GameEvent* event)
 	}
 }
 
-void on_reset_game(Game* game)
-{
-	initialize_game(game);
-}
-
 #ifndef __EMSCRIPTEN__
 void handle_game_events(Game* game)
 {
@@ -444,7 +443,7 @@ void handle_keyboard_events(Game* game)
 		on_set_player_mark(game);
 		break;
 	case RESET:
-		on_reset_game(game);
+		initialize_game(game);
 		break;
 
 	default:
@@ -516,7 +515,6 @@ void check_keyboard_event( Game* game)
 
 	}
 	const char upper_cased_input=toupper(game->event.key_buffer[0]);
-	game->event.key=upper_cased_input;
 	switch (upper_cased_input)
 	{
 		case W_KEY:
